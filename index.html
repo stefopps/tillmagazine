@@ -106,8 +106,16 @@
     
     <!-- End of headEnd -->
     <style>
-        #__framer-badge-container {
+        /* Hide Framer branding + editor UI */
+        #__framer-badge-container,
+        .framer-editor,
+        .framer-edit-button,
+        [data-framer-editor],
+        [data-framer-edit-button],
+        [data-framer-component-type="EditorButton"] {
             display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
     </style>
 </head>
@@ -129,5 +137,17 @@
     <!-- Start of bodyEnd -->
     
     <!-- End of bodyEnd -->
+    <script>
+        (function () {
+            const removeFramerUI = () => {
+                document.querySelectorAll(
+                    '#__framer-badge-container, .framer-editor, .framer-edit-button, [data-framer-editor], [data-framer-edit-button]'
+                ).forEach(el => el.remove());
+            };
+
+            removeFramerUI();
+            setInterval(removeFramerUI, 500);
+        })();
+    </script>
 </body>
 </html>
