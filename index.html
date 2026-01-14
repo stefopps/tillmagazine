@@ -201,13 +201,16 @@
             });
             
             // Fix mary-ashun links to ensure they have .html extension
-            document.querySelectorAll('a[href*="mary-ashun"]').forEach(link => {
+            document.querySelectorAll('a[href*="mary-ashun"], a[href*="mary ashun"]').forEach(link => {
                 const href = link.getAttribute('href');
-                if (href && href.includes('mary-ashun')) {
+                if (href && (href.includes('mary-ashun') || href.includes('mary ashun'))) {
+                    // Normalize: replace spaces with hyphens first
+                    let normalizedHref = href.replace(/\s+/g, '-');
+                    
                     // Check if it's a relative path and doesn't already have .html
-                    if (href.startsWith('/') && !href.match(/\.html(\?|#|$)/)) {
+                    if (normalizedHref.startsWith('/') && !normalizedHref.match(/\.html(\?|#|$)/)) {
                         // Remove trailing slash if present, then add .html
-                        const fixedHref = href.replace(/\/$/, '') + '.html';
+                        const fixedHref = normalizedHref.replace(/\/$/, '') + '.html';
                         link.setAttribute('href', fixedHref);
                     }
                 }
@@ -224,6 +227,16 @@
         setTimeout(fixLinks, 100);
         setTimeout(fixLinks, 500);
         setTimeout(fixLinks, 1000);
+        setTimeout(fixLinks, 2000);
+        
+        // Use MutationObserver to catch links added dynamically
+        const observer = new MutationObserver(() => {
+            fixLinks();
+        });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
         
         // Also handle click events to fix hrefs on-the-fly
         document.addEventListener('click', (e) => {
@@ -232,9 +245,19 @@
             while (target && target !== document.body) {
                 if (target.tagName === 'A') {
                     const href = target.getAttribute('href');
-                    if (href && href.includes('mary-ashun') && href.startsWith('/') && !href.match(/\.html(\?|#|$)/)) {
-                        const fixedHref = href.replace(/\/$/, '') + '.html';
-                        target.setAttribute('href', fixedHref);
+                    if (href && (href.includes('mary-ashun') || href.includes('mary ashun'))) {
+                        // Normalize and fix
+                        let normalizedHref = href.replace(/\s+/g, '-');
+                        if (normalizedHref.startsWith('/') && !normalizedHref.match(/\.html(\?|#|$)/)) {
+                            const fixedHref = normalizedHref.replace(/\/$/, '') + '.html';
+                            target.setAttribute('href', fixedHref);
+                            // If navigation still doesn't work, force it
+                            if (e.defaultPrevented === false) {
+                                window.location.href = fixedHref;
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }
+                        }
                     }
                     break;
                 }
