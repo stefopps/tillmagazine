@@ -187,27 +187,60 @@
     <!-- End of bodyEnd -->
     
     <script>
-    /* Fix links with spaces in href - convert spaces to hyphens */
+    /* Fix links with spaces in href - convert spaces to hyphens and ensure .html extension */
     (function () {
-        const fixLinksWithSpaces = () => {
+        const fixLinks = () => {
+            // Fix links with spaces
             document.querySelectorAll('a[href*=" "]').forEach(link => {
                 const href = link.getAttribute('href');
-                // Only fix relative paths (starting with /)
                 if (href && href.startsWith('/') && href.includes(' ')) {
                     // Replace spaces with hyphens for cleaner URLs
-                    const fixedHref = href.replace(/\s+/g, '-');
+                    let fixedHref = href.replace(/\s+/g, '-');
                     link.setAttribute('href', fixedHref);
                 }
             });
+            
+            // Fix mary-ashun links to ensure they have .html extension
+            document.querySelectorAll('a[href*="mary-ashun"]').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href.includes('mary-ashun')) {
+                    // Check if it's a relative path and doesn't already have .html
+                    if (href.startsWith('/') && !href.match(/\.html(\?|#|$)/)) {
+                        // Remove trailing slash if present, then add .html
+                        const fixedHref = href.replace(/\/$/, '') + '.html';
+                        link.setAttribute('href', fixedHref);
+                    }
+                }
+            });
         };
+        
         // Run immediately and after DOM is fully loaded
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', fixLinksWithSpaces);
+            document.addEventListener('DOMContentLoaded', fixLinks);
         } else {
-            fixLinksWithSpaces();
+            fixLinks();
         }
-        // Also run after a short delay to catch dynamically added links
-        setTimeout(fixLinksWithSpaces, 100);
+        // Also run after delays to catch dynamically added links
+        setTimeout(fixLinks, 100);
+        setTimeout(fixLinks, 500);
+        setTimeout(fixLinks, 1000);
+        
+        // Also handle click events to fix hrefs on-the-fly
+        document.addEventListener('click', (e) => {
+            let target = e.target;
+            // Walk up the DOM tree to find a link
+            while (target && target !== document.body) {
+                if (target.tagName === 'A') {
+                    const href = target.getAttribute('href');
+                    if (href && href.includes('mary-ashun') && href.startsWith('/') && !href.match(/\.html(\?|#|$)/)) {
+                        const fixedHref = href.replace(/\/$/, '') + '.html';
+                        target.setAttribute('href', fixedHref);
+                    }
+                    break;
+                }
+                target = target.parentElement;
+            }
+        }, true);
     })();
     </script>
     
