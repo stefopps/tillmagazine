@@ -112,6 +112,8 @@
     <style>
     /* Hide Framer branding + editor UI */
     #framer-badge-container,
+    #__framer-badge-container,
+    .__framer-badge,
     .framer-editor,
     .framer-edit-button,
     [data-framer-editor],
@@ -185,10 +187,35 @@
     <!-- End of bodyEnd -->
     
     <script>
+    /* Fix links with spaces in href - convert spaces to hyphens */
+    (function () {
+        const fixLinksWithSpaces = () => {
+            document.querySelectorAll('a[href*=" "]').forEach(link => {
+                const href = link.getAttribute('href');
+                // Only fix relative paths (starting with /)
+                if (href && href.startsWith('/') && href.includes(' ')) {
+                    // Replace spaces with hyphens for cleaner URLs
+                    const fixedHref = href.replace(/\s+/g, '-');
+                    link.setAttribute('href', fixedHref);
+                }
+            });
+        };
+        // Run immediately and after DOM is fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fixLinksWithSpaces);
+        } else {
+            fixLinksWithSpaces();
+        }
+        // Also run after a short delay to catch dynamically added links
+        setTimeout(fixLinksWithSpaces, 100);
+    })();
+    </script>
+    
+    <script>
     (function () {
         const removeFramerUI = () => {
             document.querySelectorAll(
-                '#framer-badge-container, .framer-editor, .framer-edit-button, [data-framer-editor], [data-framer-edit-button]'
+                '#framer-badge-container, #__framer-badge-container, .__framer-badge, .framer-editor, .framer-edit-button, [data-framer-editor], [data-framer-edit-button]'
             ).forEach(el => el.remove());
         };
         removeFramerUI();
